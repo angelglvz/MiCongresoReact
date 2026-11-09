@@ -4,27 +4,29 @@ import { generateParliamentSeats } from '../utils/paliamentLayout';
 
 interface ParliamentChartProps {
   partidos: Partido[];
-  selectedIds: Set<string>;
 }
 
-export const ParliamentChart: React.FC<ParliamentChartProps> = ({ partidos, selectedIds }) => {
-  const seats = generateParliamentSeats(partidos, selectedIds);
+export const ParliamentChart: React.FC<ParliamentChartProps> = ({ partidos }) => {
+  const seats = generateParliamentSeats(partidos);
 
   return (
-    <div className="w-full flex justify-center items-center py-4">
-      <svg viewBox="0 0 400 210" className="w-full max-w-lg drop-shadow-md">
-        {seats.map((seat, index) => (
+    <div className="w-full flex flex-col items-center justify-center bg-white p-4">
+      <svg viewBox="0 0 400 210" className="w-full max-w-xl h-auto">
+        {seats.map((seat) => (
           <circle
-            key={index}
+            key={seat.id}
             cx={seat.x}
             cy={seat.y}
-            r="3.5"
+            r="3.2"
             fill={seat.color}
-            className="transition-colors duration-300 hover:r-5 cursor-pointer"
+            className="transition-all duration-300"
           >
-            <title>{`${seat.partidoNombre}`}</title>
+            <title>{seat.partidoSiglas}</title>
           </circle>
         ))}
+        <text x="200" y="185" textAnchor="middle" className="text-xs font-bold fill-slate-400">
+          350 ESCAÑOS
+        </text>
       </svg>
     </div>
   );

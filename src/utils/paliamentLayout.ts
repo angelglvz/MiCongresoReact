@@ -1,66 +1,59 @@
 import type { Partido } from '../data/partidos';
 
 export interface Seat {
+  id: number;
   x: number;
   y: number;
   color: string;
-  partidoId: string;
-  partidoNombre: string;
-  inGovernment: boolean;
+  partidoSiglas: string;
 }
 
-export function generateParliamentSeats(
-  partidos: Partido[],
-  selectedIds: Set<string>
-): Seat[] {
-  const totalSeats = partidos.reduce((acc, p) => acc + p.escanos, 0);
+export function generateParliamentSeats(partidos: Partido[]): Seat[] {
   const seats: Seat[] = [];
-
-  // Expandir partidos a un array individual de asientos
-  const seatList: { partidoId: string; partidoNombre: string; color: string; inGov: boolean }[] = [];
   
+  const seatList: { color: string; siglas: string }[] = [];
   partidos.forEach((p) => {
-    const isSelected = selectedIds.has(p.id);
     for (let i = 0; i < p.escanos; i++) {
-      seatList.push({
-        partidoId: p.id,
-        partidoNombre: p.nombre,
-        color: isSelected ? p.color : '#D1D5DB', // Color gris si no está en la coalición
-        inGov: isSelected,
-      });
+      seatList.push({ color: p.color, siglas: p.siglas });
     }
   });
 
-  // Radio y filas del semicírculo
-  const rows = 5;
-  const minRadius = 70;
-  const maxRadius = 170;
+  // Rellenar hasta 350 con escaños libres/grises si la suma no llega
+  while (seatList.length < 350) {
+    seatList.push({ color: '#E5E7EB', siglas: 'Libre' });
+  }
+  const slicedSeats = seatList.slice(0, 350);
+
+  const rowsConfig = [
+    { radius: 75, count: 46 },
+    { radius: 100, count: 60 },
+    { radius: 125, count: 72 },
+    { radius: 150, count: 84 },
+    { radius: 175, count: 88 },
+  ];
+
   const centerX = 200;
   const centerY = 190;
+  
+  let currentSeatIndex = 0;
 
-  // Calcular capacidad por fila
-  let seatsAssigned = 0;
-  for (let r = 0; r < rows; r++) {
-    const radius = minRadius + (r * (maxRadius - minRadius)) / (rows - 1);
-    const seatsInRow = Math.round((radius / maxRadius) * (totalSeats / 2.8));
-    
-    for (let i = 0; i < seatsInRow && seatsAssigned < seatList.length; i++) {
-      const angle = Math.PI - (i * Math.PI) / (seatsInRow - 1);
+  rowsConfig.forEach((row) => {
+    const { radius, count } = row;
+    for (let i = 0; i < count && currentSeatIndex < slicedSeats.length; i++) {
+      const angle = Math.PI - (i / (count - 1)) * Math.PI;
       const x = centerX + radius * Math.cos(angle);
       const y = centerY - radius * Math.sin(angle);
-      
-      const item = seatList[seatsAssigned];
+
       seats.push({
+        id: currentSeatIndex,
         x,
         y,
-        color: item.color,
-        partidoId: item.partidoId,
-        partidoNombre: item.partidoNombre,
-        inGovernment: item.inGov,
+        color: slicedSeats[currentSeatIndex].color,
+        partidoSiglas: slicedSeats[currentSeatIndex].siglas,
       });
-      seatsAssigned++;
+      currentSeatIndex++;
     }
-  }
+  });
 
   return seats;
 }
