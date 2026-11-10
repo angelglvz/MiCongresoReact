@@ -4,10 +4,11 @@ import { generateParliamentSeats } from '../utils/paliamentLayout';
 
 interface ParliamentChartProps {
   partidos: Partido[];
+  selectedIds: Set<string>;
 }
 
-export const ParliamentChart: React.FC<ParliamentChartProps> = ({ partidos }) => {
-  const seats = generateParliamentSeats(partidos);
+export const ParliamentChart: React.FC<ParliamentChartProps> = ({ partidos, selectedIds }) => {
+  const seats = generateParliamentSeats(partidos, selectedIds);
 
   return (
     <div className="w-full flex flex-col items-center justify-center bg-white p-4">
